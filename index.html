@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F2EFE7">
+<title>每日一思 · 成年人的逻辑题</title>
+<style>
+:root{
+  --paper:#F7F4EC; --ink:#2A2722; --ink2:#4E483F; --muted:#8A8175;
+  --rule:#D6CCB8; --accent:#3E5C50; --accent2:#8C5A3C;
+  --serif:"Songti SC","STSong","SimSun",Georgia,serif;
+  --sans:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;background:#E7E2D6;color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.85;padding:20px 14px 46px;
+}
+.wrap{max-width:620px;margin:0 auto}
+header{text-align:center;padding:14px 0 18px}
+h1{margin:0;font-family:var(--serif);font-size:26px;letter-spacing:.22em;font-weight:600}
+.latin{margin:8px 0 0;font-family:Georgia,serif;font-size:10.5px;letter-spacing:.4em;color:var(--muted)}
+.rule{display:flex;align-items:center;gap:12px;margin:16px auto;max-width:300px;color:var(--rule)}
+.rule::before,.rule::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--rule),transparent)}
+.rule span{font-size:8px;color:var(--accent)}
+.meta{font-size:12px;letter-spacing:.14em;color:var(--muted)}
+
+.card{background:var(--paper);border:1px solid var(--rule);padding:22px 20px 18px;
+  box-shadow:0 10px 30px -22px rgba(60,50,30,.7);position:relative}
+.card::after{content:"";position:absolute;inset:6px;border:1px solid rgba(214,204,184,.5);pointer-events:none}
+.tag{display:inline-block;font-size:10.5px;letter-spacing:.16em;color:var(--accent);
+  border:1px solid #BCCBC3;background:#EEF3EF;padding:2px 8px}
+.lv{font-size:10px;letter-spacing:3px;color:var(--accent2);margin-left:8px}
+.q{margin:14px 0 6px;font-family:var(--serif);font-size:18px;line-height:2;white-space:pre-wrap}
+.acts{display:flex;gap:10px;margin-top:18px}
+button{font-family:inherit;font-size:13.5px;letter-spacing:.14em;padding:10px 18px;cursor:pointer;
+  border:1px solid var(--ink);background:transparent;color:var(--ink);transition:.2s}
+button:hover{background:var(--ink);color:var(--paper)}
+button.primary{background:var(--ink);color:var(--paper)}
+.panel{margin-top:14px;padding:13px 15px;font-size:14px;line-height:1.95;animation:fade .2s ease}
+.panel.hint{background:#EFEADC;border-left:3px solid var(--rule);color:var(--ink2)}
+.panel.ans{background:#EEF3EF;border-left:3px solid var(--accent);color:#24413A}
+.panel .lbl{display:block;font-size:10px;letter-spacing:.22em;color:var(--muted);margin-bottom:3px}
+.hidden{display:none}
+details.why{margin-top:16px;border-top:1px dashed var(--rule);padding-top:12px}
+details.why summary{cursor:pointer;list-style:none;font-size:12px;letter-spacing:.12em;color:var(--muted)}
+details.why summary::-webkit-details-marker{display:none}
+details.why summary::before{content:"▸ ";font-size:10px}
+details.why[open] summary::before{content:"▾ "}
+details.why .body{margin-top:10px;font-size:14px;line-height:2;color:var(--ink2)}
+
+.past{margin-top:34px}
+.past h2{font-size:12px;letter-spacing:.28em;color:var(--muted);font-weight:400;
+  border-bottom:1px solid var(--rule);padding-bottom:8px;margin:0 0 4px}
+details.item{border-bottom:1px solid #DCD3C0}
+details.item>summary{cursor:pointer;list-style:none;padding:12px 2px;display:flex;gap:10px;align-items:baseline}
+details.item>summary::-webkit-details-marker{display:none}
+details.item .no{font-size:10.5px;color:var(--muted);min-width:40px}
+details.item .txt{flex:1;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+details.item .date{font-size:10.5px;color:var(--muted);min-width:46px;text-align:right}
+details.item .inner{padding:2px 2px 14px 50px;font-size:14px;line-height:1.95;color:var(--ink2)}
+details.item .inner .a{color:var(--accent);font-weight:700}
+
+.foot{margin-top:34px;text-align:center;font-size:11px;color:var(--muted);line-height:2;letter-spacing:.06em}
+@media (max-width:380px){ h1{font-size:22px} .q{font-size:16.5px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>每 日 一 思</h1>
+    <p class="latin">DAILY REASONING</p>
+    <div class="rule"><span>❖</span></div>
+    <p class="meta" id="meta">—</p>
+  </header>
+
+  <div class="card" id="card"></div>
+
+  <div class="past">
+    <h2>往 期</h2>
+    <div id="past"></div>
+  </div>
+
+  <div class="foot">一天一题，想清楚再点答案。<br>答案默认收起，提示只给方向，不给解法。</div>
+</div>
+
+<script>
+var START = new Date(2026, 10, 24);   // 2026-11-24 起
+
+var QS = [
+  { lv:2, tag:"算术陷阱", q:"三个人住店，房费 30 元，每人出 10 元。\n老板说今天优惠，只收 25 元，让服务员退 5 元。\n服务员藏起 2 元，退给每人 1 元。\n\n这样每人实际出了 9 元，共 27 元，\n加上服务员藏的 2 元，是 29 元。\n\n少的 1 元去哪了？",
+    hint:"27 元里已经包含了什么？",
+    a:"没有少钱，是加法用错了",
+    why:"三人实付 27 元 = 房费 25 + 服务员藏的 2。27 元里已经含了那 2 元，再加一次就成了重复计算。正确的账是：25（房费）+ 2（小费）+ 3（退回）= 30。" },
+
+  { lv:2, tag:"逻辑 · 真假门", q:"两扇门，一扇通向自由，一扇通向深渊。\n门前各站一个守卫：一个永远说真话，一个永远说假话。\n你只能问其中一个人一个问题。\n\n怎么问，才能确定哪扇门通向自由？",
+    hint:"让说假话的人也“帮你”指向错误的那扇。",
+    a:"问任意一个：“如果我问另一个人哪扇门通向自由，他会指哪扇？”然后走另一扇",
+    why:"说真话的人会如实转述假话者的错误答案；说假话的人会把真话者的正确答案说反。无论问谁，得到的手指都指向深渊，走另一扇就对。" },
+
+  { lv:2, tag:"过河", q:"农夫带着一只狼、一只羊和一筐菜过河。\n船每次只能带农夫和一样东西。\n农夫不在时，狼会吃羊，羊会吃菜。\n\n最少几次渡河能全部过去？",
+    hint:"羊是关键的“中间物”，它得来回坐船。",
+    a:"7 次", why:"带羊过（1）、空船回（2）、带狼过（3）、带羊回（4）、带菜过（5）、空船回（6）、带羊过（7）。核心是：羊必须被带回来一次。" },
+
+  { lv:2, tag:"称重", q:"9 枚硬币，其中 1 枚比其他的轻。\n用一台没有砝码的天平，最少称几次能找出它？",
+    hint:"不要一枚一枚比，想想一次能排除多少枚。",
+    a:"2 次", why:"分成 3、3、3 三组。第一次称两组：平则轻的在第三组，不平则在轻的那组。第二次从那组拿 2 枚互称，平则是第三枚，不平则轻的那枚。" },
+
+  { lv:2, tag:"量水", q:"一个 5 升桶、一个 3 升桶，都没有刻度。\n水源无限。\n\n怎么量出正好 4 升？",
+    hint:"关键是让 3 升桶里先留下 2 升。",
+    a:"装 5 升 → 倒满 3 升桶（5 升桶剩 2）→ 倒空 3 升桶 → 把 2 升倒进 3 升桶 → 再装满 5 升桶 → 往 3 升桶里倒，倒满为止（只倒进 1 升）→ 5 升桶剩下 4 升",
+    why:"整个过程只用到“装满”和“倒到满为止”，不需要刻度。最后 5 升桶里的 4 升 = 5 − 1。" },
+
+  { lv:3, tag:"计时", q:"两根绳子，每根从头烧到尾都要 60 分钟，\n但燃烧速度不均匀（中间某段可能烧得特别快）。\n\n只有一个打火机，怎么量出 45 分钟？",
+    hint:"同时点一根的两头，它 30 分钟烧完。",
+    a:"A 绳两头同时点燃、B 绳只点一头；A 烧完时（30 分钟）立刻点燃 B 的另一头；B 剩下的一段两头同时烧，15 分钟烧完。合计 45 分钟",
+    why:"两头同时烧，烧完时间减半（不管均匀不均匀）。A 烧完用 30 分钟，此时 B 已烧了 30 分钟、还剩 30 分钟的量；再从另一头点火，两头夹烧，15 分钟烧完。" },
+
+  { lv:3, tag:"数列", q:"1、11、21、1211、111221、\n下一个数是什么？",
+    hint:"把这个数念出来试试。",
+    a:"312211", why:"每个数都在“描述”前一个数：1 → “一个1” = 11；11 → “两个1” = 21；21 → “一个2一个1” = 1211；1211 → “一个1一个2两个1” = 111221；111221 → “三个1两个2一个1” = 312211。" },
+
+  { lv:3, tag:"概率 · 反直觉", q:"三扇门，一扇后面是汽车，另两扇是山羊。\n你选了 1 号门。\n主持人知道答案，他打开 3 号门，后面是山羊，\n然后问你要不要换成 2 号门。\n\n换还是不换？",
+    hint:"主持人打开门这个动作，是带信息的。",
+    a:"应该换，换门中奖概率是 2/3，不换是 1/3",
+    why:"你一开始选中的概率是 1/3，选错的概率是 2/3。主持人排除一个错误选项后，那 2/3 的概率全部集中到剩下的那扇门上。不换，你赢的概率仍是当初的 1/3。" },
+
+  { lv:3, tag:"标签悖论", q:"三个盒子：一盒只有苹果、一盒只有橘子、一盒混装。\n三张标签全贴错了。\n\n你只能从一个盒子里摸出一个水果，\n怎么判断三个盒子里各是什么？",
+    hint:"三个标签都错，所以“混装”那个盒子一定不是混装。",
+    a:"从标着“混装”的盒子里摸一个：摸到苹果，它就是纯苹果；标“橘子”的是混装，标“苹果”的是纯橘子（反之亦然）",
+    why:"标签全错，所以标“混装”的盒子只能是纯的某种。摸出什么，它就是纯的什么；剩下两个盒子按“标签全错”继续推即可。" },
+
+  { lv:3, tag:"电灯与开关", q:"门外有三个开关，门内有三盏灯。\n你只能进门一次。\n\n怎么判断每个开关控制哪盏灯？",
+    hint:"灯除了亮和灭，还有温度。",
+    a:"打开 1 号开关，等十分钟后关掉；打开 2 号开关，立刻进门。亮着的对应 2 号，摸着热的对应 1 号，剩下凉的对应 3 号",
+    why:"利用了灯泡的余热，把“两个状态”扩展成“三个状态”：亮、热、冷。" },
+
+  { lv:2, tag:"概率 · 反直觉", q:"一个房间里至少有多少人，\n才能让“存在两个人生日相同”的概率超过 50%？",
+    hint:"别按 365 的一半去想，反过来算“全都不相同”。",
+    a:"23 人（约 50.7%）",
+    why:"算“生日全不相同”的概率：23 个人时约为 49.3%，所以“至少两人相同”约为 50.7%。直觉之所以错，是因为组合数太多——23 个人两两配对有 253 对。" },
+
+  { lv:3, tag:"构造", q:"一副牌 52 张，其中 10 张正面朝上，其余反面朝上。\n你被蒙住眼睛，不能摸出正反。\n\n怎么把它们分成两堆，使两堆正面朝上的张数相同？",
+    hint:"随便拿出 10 张作为一堆，然后做一件事。",
+    a:"随便取 10 张作 A 堆、剩下 42 张作 B 堆，然后把 A 堆整堆翻面",
+    why:"设 A 堆原本有 k 张正面。B 堆就有 10−k 张正面。A 堆翻面后，正面的数量变成 10−k。两堆相等。" },
+
+  { lv:3, tag:"策略", q:"四个人夜里过一座桥，只有一个手电筒，\n每次最多两人同行，必须有手电。\n四人过桥分别要 1、2、5、10 分钟，两人同行按慢的那个算。\n\n全部过桥最少要几分钟？",
+    hint:"让最慢的两个人一起过，才省时间。",
+    a:"17 分钟",
+    why:"1&2 过（2）、1 回（1）、5&10 过（10）、2 回（2）、1&2 过（2），合计 17。关键是用 1 号送手电、让 5 和 10 一起走。" },
+
+  { lv:3, tag:"策略", q:"25 匹马，5 条赛道，没有秒表。\n每次最多 5 匹马比赛，只知道名次。\n\n最少比几次能找出最快的 3 匹？",
+    hint:"先分 5 组跑，再让各组第一跑一次。",
+    a:"7 次", why:"5 组各跑一次（5 次）；5 个第一名跑一次（第 6 次）；淘汰掉不可能进前三的马，剩下的候选再跑一次（第 7 次）。" },
+
+  { lv:3, tag:"信息 · 二进制", q:"1000 瓶酒，其中 1 瓶有毒。\n10 只小白鼠，喝到毒酒 24 小时后死亡。\n\n只测一次，怎么找出毒酒？",
+    hint:"每瓶酒都可以用 10 个开关表示。",
+    a:"给 1000 瓶编号 1~1000，写成二进制；第 i 只老鼠喝“第 i 位是 1”的所有酒样。24 小时后死亡的老鼠，按位置拼出一个二进制数，就是毒酒编号",
+    why:"10 只老鼠的生死组合有 2¹⁰ = 1024 种状态，足够标号 1000 瓶酒。这是二进制编码，不是化学。" },
+
+  { lv:3, tag:"最优策略", q:"两个鸡蛋，100 层楼。\n鸡蛋从某层以上落下会碎，以下不会。\n\n最坏情况下，最少要试几次才能确定那一层？",
+    hint:"第一个蛋用来“分段”，段要越往上越短。",
+    a:"14 次",
+    why:"若第一次在 14 层、之后每次多上一层（14、27、39…），最坏次数固定。需要 1+2+…+n ≥ 100，n=14 时 105 ≥ 100，所以 14 次。" },
+
+  { lv:3, tag:"博弈", q:"5 个海盗分 100 枚金币。\n由 1 号提出方案，所有人（含自己）投票，\n至少半数同意才通过，否则 1 号被扔下海，由 2 号继续。\n海盗都理性、贪婪、且优先保命。\n\n1 号怎么分才能活下来且拿最多？",
+    hint:"从只剩 2 个人的情况倒着推。",
+    a:"1 号拿 98，给 3 号 1 枚、给 5 号 1 枚，其余为 0",
+    why:"倒推：剩 2 人时 4 号必死，5 号全拿；剩 3 人时 3 号给 5 号 1 枚即可；剩 4 人时 2 号给 4 号 1 枚；所以他们只要有 1 枚就会支持 1 号。1 号给 3 号、5 号各 1 枚，加上自己一票正好过半。" },
+
+  { lv:3, tag:"逻辑 · 帽子", q:"3 顶白帽、2 顶黑帽，三人各戴一顶（自己看不见）。\n三人排队，C 看得见 A、B，B 看得见 A，A 谁都看不见。\n\n问 A：“你知道自己帽子颜色吗？” A 说不知道。\n问 B，B 也说不知道。\n问 C，C 说知道。\n\nC 戴什么颜色？",
+    hint:"如果 C 是黑帽，B 会怎么想？",
+    a:"白色",
+    why:"假设 C 是黑帽。B 看到 A 白、C 黑。B 想：若我也是黑，A 会看到两顶黑，立刻知道自己白，就不会说“不知道”。A 说不知道，说明我不是黑，B 就该说“知道”。但 B 也说不知道，矛盾。所以 C 不是黑，是白。" },
+
+  { lv:2, tag:"年龄", q:"甲对乙说：\n“当我像你这么大时，你才 2 岁；\n当你像我这么大时，我已经 62 岁了。”\n\n两人现在各几岁？",
+    hint:"两人年龄差始终不变，设它为 d。",
+    a:"甲 42 岁，乙 22 岁",
+    why:"设年龄差 d。乙 − d = 2，甲 + d = 62，且甲 − 乙 = d。解得 d = 20，乙 = 22，甲 = 42。" },
+
+  { lv:1, tag:"概率 · 独立性", q:"抛硬币，连续 5 次都是正面。\n第 6 次出现反面的概率是多少？",
+    hint:"硬币记得前 5 次的结果吗？",
+    a:"仍然是 50%", why:"每次抛掷相互独立，历史结果不影响下一次。所谓“该出反面了”是赌徒谬误。" },
+
+  { lv:2, tag:"速度 · 相对运动", q:"两列火车相距 100 公里，相向而行，各 50 公里/小时。\n一只苍蝇从第一列车头出发，以 75 公里/小时往返飞行，\n直到两车相遇。\n\n苍蝇一共飞了多远？",
+    hint:"别算往返次数，算时间。",
+    a:"75 公里", why:"两车相对速度 100 公里/小时，100 公里需要 1 小时相遇。苍蝇飞了 1 小时，速度 75，所以飞了 75 公里。" },
+
+  { lv:2, tag:"算术陷阱", q:"葱 1 元 1 斤，共 100 斤。\n买葱的人说：葱白 7 毛、葱绿 3 毛，分开买。\n卖葱的人觉得合理，就卖了。\n\n结果只收到 50 元。为什么少了 50 元？",
+    hint:"一斤葱里，葱白和葱绿各占多少？",
+    a:"因为一斤葱是“半斤白 + 半斤绿”，价格不能拆开按斤算",
+    why:"100 斤葱 = 50 斤白 + 50 斤绿。白 50×0.7=35，绿 50×0.3=15，共 50 元。原本 1 元/斤是“整根葱”的价，拆成两种各 1 斤才是 1 元，但他俩按“半斤”算了。" },
+
+  { lv:3, tag:"概率 · 条件", q:"三个盒子：两金、两银、一金一银。\n随机挑一盒，随机摸出一个球，是金球。\n\n这个盒子是“两金”盒的概率是多少？",
+    hint:"摸出金球这件事，改变了三个盒子被选中的可能性。",
+    a:"2/3", why:"先验各 1/3；摸到金球的概率分别是 1、1/2、0。所以后验 = (1/3×1) ÷ (1/3×1 + 1/3×1/2 + 1/3×0) = (1/3)/(1/2) = 2/3。" },
+
+  { lv:2, tag:"称重", q:"8 枚硬币，其中 1 枚比其他重。\n用没有砝码的天平，最少称几次能找出它？",
+    hint:"一次称 3 对 3，能排除多少？",
+    a:"2 次", why:"分 3、3、2。称 3 对 3：平则重的在剩下 2 枚里，第 2 次互称即可；不平则在重的那 3 枚里，第 2 次取 2 枚互称，平则是第三枚。" }
+];
+
+/* ---------- 日期：每天一题 ---------- */
+function pad(n){ return n < 10 ? '0' + n : '' + n; }
+function ymd(d){ return d.getFullYear() + ' 年 ' + (d.getMonth()+1) + ' 月 ' + d.getDate() + ' 日'; }
+function dateOfIndex(i){ var d = new Date(START); d.setDate(d.getDate() + i); return d; }
+function dayIndex(d){
+  var a = new Date(START.getFullYear(), START.getMonth(), START.getDate());
+  var b = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  return Math.max(0, Math.round((b - a) / 86400000));
+}
+function shortDate(d){ return (d.getMonth()+1) + '/' + d.getDate(); }
+
+var today = new Date();
+var idx = Math.min(dayIndex(today), QS.length - 1);
+var cur = QS[idx];
+
+document.getElementById('meta').textContent =
+  ymd(today) + '　·　第 ' + (idx + 1) + ' 题';
+
+var card = document.getElementById('card');
+var stars = '★★★'.slice(0, cur.lv) + '☆☆☆'.slice(0, 3 - cur.lv);
+card.innerHTML =
+  '<span class="tag">' + cur.tag + '</span><span class="lv">' + stars + '</span>' +
+  '<div class="q">' + cur.q.replace(/\n/g, '<br>') + '</div>' +
+  '<div class="acts">' +
+    '<button id="b-hint" type="button">给点提示</button>' +
+    '<button class="primary" id="b-ans" type="button">看答案</button>' +
+  '</div>' +
+  '<div class="panel hint hidden" id="p-hint"><span class="lbl">提 示</span>' + cur.hint + '</div>' +
+  '<div class="panel ans hidden" id="p-ans"><span class="lbl">答 案</span>' + cur.a + '</div>' +
+  '<details class="why"><summary>解析</summary><div class="body">' + cur.why + '</div></details>';
+
+var ph = document.getElementById('p-hint'), pa = document.getElementById('p-ans');
+document.getElementById('b-hint').onclick = function(){
+  ph.classList.toggle('hidden');
+  this.textContent = ph.classList.contains('hidden') ? '给点提示' : '收起提示';
+};
+document.getElementById('b-ans').onclick = function(){
+  pa.classList.toggle('hidden');
+  this.textContent = pa.classList.contains('hidden') ? '看答案' : '收起答案';
+};
+
+/* ---------- 往期 ---------- */
+var past = document.getElementById('past');
+if (idx === 0) {
+  past.innerHTML = '<div style="padding:20px 4px;color:#8A8175;font-size:13px">今天是第一题。</div>';
+} else {
+  var h = '';
+  for (var i = idx - 1; i >= 0; i--) {
+    var it = QS[i], d = dateOfIndex(i);
+    h += '<details class="item"><summary>' +
+      '<span class="no">第' + (i+1) + '题</span>' +
+      '<span class="txt">' + it.q.split('\n')[0] + '</span>' +
+      '<span class="date">' + shortDate(d) + '</span>' +
+      '</summary><div class="inner">' + it.q.replace(/\n/g,'<br>') +
+      '<div style="margin-top:10px"><span class="lbl" style="font-size:10px;letter-spacing:.2em;color:#8A8175">答 案</span><br><span class="a">' + it.a + '</span></div>' +
+      '<div style="margin-top:8px;color:#4E483F">' + it.why + '</div>' +
+      '</div></details>';
+  }
+  past.innerHTML = h;
+}
+</script>
+</body>
+</html>
